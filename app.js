@@ -4,6 +4,7 @@ var exphbs = require('express-handlebars');
 var request = require('request');
 var async = require('async');
 var cheerio = require('cheerio');
+var iconv = require('iconv-lite');
 
 app.engine('.hbs', exphbs({
     defaultLayout: 'main', 
@@ -18,25 +19,27 @@ app.get('/luck', function (req,res){
 
 app.get('/', function (req, res){
     var url = 'http://www.cartoonmad.com/comic/1152.html';
+    var encode = 'big5';
 
     async.waterfall([
         function (cb) {
-            request(url, function (errRequest, response, body) {
+            request({url: url, encoding: null}, function (errRequest, response, body) {
                 if(errRequest){
                     return cb(err);
                 }
-                cb(null, body);
+                cb(null, response, body);
             });
         }
-        ], function(err, html) {
+        ], function (err, response, body) {
             if (err) {
                 res.render('index', { result:err });
             }
-            var $ = cheerio.load(html.toString('utf8'));
-            var info = $('#info').find('td').text().trim().replace(/(\r\n|\n|\r|\s)/g,'');
-            //var info = $('#info').trim().replace(/(\r\n|\n|\r|\s)/g,'');
-            var result = info;
-            res.render('index', { result:result});
+            var html = iconv.decode(new Buffer(body), encode);
+            var $ = cheerio.load(html);
+            //var info = $('#info').find('td').text().trim().replace(/(\r\n|\n|\r|\s)/g,'');
+            var info = $('#info').find('td').html().trim();//.replace(/(\r\n|\n|\r|\s)/g,'');
+            //var result = info;
+            res.render('index', { result: info});
         }
     );
 
