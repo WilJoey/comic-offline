@@ -28,12 +28,15 @@ app.get('/', function (req, res){
                 cb(null, body);
             });
         }
-        ], function(err, output) {
+        ], function(err, html) {
             if (err) {
                 res.render('index', { result:err });
             }
-            var result = "joe";
-            res.render('index', { result:output});
+            var $ = cheerio.load(html.toString('utf8'));
+            var info = $('#info').find('td').text().trim().replace(/(\r\n|\n|\r|\s)/g,'');
+            //var info = $('#info').trim().replace(/(\r\n|\n|\r|\s)/g,'');
+            var result = info;
+            res.render('index', { result:result});
         }
     );
 
