@@ -35,11 +35,15 @@ app.get('/', function (req, res){
                 res.render('index', { result:err });
             }
             var html = iconv.decode(new Buffer(body), encode);
-            var $ = cheerio.load(html);
+            var $ = cheerio.load(html,{
+                normalizeWhitespace: false,
+                xmlMode: false,
+                decodeEntities: false //dont decode
+            });
             //var info = $('#info').find('td').text().trim().replace(/(\r\n|\n|\r|\s)/g,'');
-            var info = $('#info').find('td').html().trim();//.replace(/(\r\n|\n|\r|\s)/g,'');
+            var info = $('#info');//.find('td').html().trim(); //.replace(/(\r\n|\n|\r|\s)/g,'');
             //var result = info;
-            res.render('index', { result: info});
+            res.render('index', { result: info.length});
         }
     );
 
