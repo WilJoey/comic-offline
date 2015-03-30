@@ -5,6 +5,7 @@ var request = require('request');
 var async = require('async');
 var cheerio = require('cheerio');
 var iconv = require('iconv-lite');
+var parser = require('./libs/parseHtml.js');
 
 app.engine('.hbs', exphbs({
     defaultLayout: 'main', 
@@ -35,15 +36,9 @@ app.get('/', function (req, res){
                 res.render('index', { result:err });
             }
             var html = iconv.decode(new Buffer(body), encode);
-            var $ = cheerio.load(html,{
-                normalizeWhitespace: false,
-                xmlMode: false,
-                decodeEntities: false //dont decode
-            });
-            //var info = $('#info').find('td').text().trim().replace(/(\r\n|\n|\r|\s)/g,'');
-            var info = $('#info');//.find('td').html().trim(); //.replace(/(\r\n|\n|\r|\s)/g,'');
-            //var result = info;
-            res.render('index', { result: info.length});
+
+            var result = parser.parseCollection(html);
+            res.render('index', { result: result});
         }
     );
 
